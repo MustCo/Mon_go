@@ -2,9 +2,11 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"log"
+	"os"
 	"os/signal"
 	"syscall"
 
@@ -25,11 +27,13 @@ func main() {
 	flag.Parse()
 	config := utils.NewConfig()
 
-	//data, err := os.ReadFile(configPath)
+	data, err := os.ReadFile(configPath)
+	if err != nil {
+		log.Fatal(err)
+	}
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 	defer cancel()
-	//json.Unmarshal(data, config)
-
+	json.Unmarshal(data, config)
 	if err := env.Parse(config); err != nil {
 		log.Fatal(err)
 	}
@@ -37,7 +41,7 @@ func main() {
 	fmt.Printf("%+v\n", config.PollInterval)
 	fmt.Printf("%+v\n", config.ReportInterval)
 	agent := agent.New(config)
-	err := agent.Start(ctx)
+	err = agent.Start(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}

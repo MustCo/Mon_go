@@ -31,7 +31,13 @@ func (c Counter) String() string {
 }
 
 func (m *Metrics) String() string {
-	s := fmt.Sprintf("ID:%s\ntype:%s\ndelta:%d\nvalue:%f\n", m.ID, m.MType, *m.Delta, *m.Value)
+	s := fmt.Sprintf("ID:%s\ntype:%s\n", m.ID, m.MType)
+	if m.Delta != nil {
+		s += fmt.Sprintf("delta:%v\n", *m.Delta)
+	}
+	if m.Delta != nil {
+		s += fmt.Sprintf("value:%v\n", *m.Value)
+	}
 	return s
 }
 

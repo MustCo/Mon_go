@@ -38,7 +38,7 @@ func (c *APIAgent) sendJSON(m *utils.Metrics) error {
 			"host": c.config.Address,
 		}).
 		Post("http://{host}/update/")
-	log.Print(*m)
+	log.Printf("Send JSON:\n%v", m)
 	if err != nil {
 		return err
 	}
@@ -59,10 +59,11 @@ func (c *APIAgent) Start(ctx context.Context) error {
 	m := utils.NewMetricsStorage()
 	c.client = resty.New()
 	c.client.R().
-		SetHeader("Content-Type", "application/json")
+		SetHeader("Content-Type", "application/json").
+		SetHeader("Accept", "application/json")
 
-	reports := time.NewTicker(time.Duration(c.config.ReportInterval) * time.Second)
-	polls := time.NewTicker(time.Duration(c.config.PollInterval) * time.Second)
+	reports := time.NewTicker(c.config.ReportInterval)
+	polls := time.NewTicker(c.config.PollInterval)
 	for {
 		select {
 		case <-reports.C:
