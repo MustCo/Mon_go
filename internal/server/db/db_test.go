@@ -1,4 +1,4 @@
-package server
+package db
 
 import (
 	"errors"
@@ -9,7 +9,7 @@ import (
 )
 
 func getInitDB() *DB {
-	initDB := NewDB()
+	initDB := New()
 	m := utils.NewMetrics("TestGauge", "gauge")
 	*m.Value = 123.123
 	initDB.Metrics["TestGauge"] = m
@@ -96,7 +96,7 @@ func TestDB_Set(t *testing.T) {
 }
 
 func TestDB_Get(t *testing.T) {
-	initDB := NewDB()
+	initDB := New()
 	initDB.Set("gauge", "TestGauge", "123.123")
 	initDB.Set("counter", "TestCounter", "123")
 	initDB.Set("gauge", "Mygauge", "14.563")

@@ -1,4 +1,4 @@
-package server
+package db
 
 import (
 	"errors"
@@ -9,14 +9,7 @@ import (
 	"github.com/Snakder/Mon_go/internal/utils"
 )
 
-type Storage interface {
-	Get(t, name string) (*utils.Metrics, error)
-	GetAll() utils.MetricsStorage
-	Set(t, name, val string) error
-	SetMetrica(metrica *utils.Metrics) error
-}
-
-func NewDB() *DB {
+func New() *DB {
 	db := new(DB)
 	db.Metrics = utils.NewMetricsStorage()
 	db.mut = new(sync.Mutex)
@@ -62,33 +55,7 @@ func (db *DB) Set(t, name, val string) error {
 
 }
 
-func (db *DB) SetMetrica(metrica *utils.Metrics) error {
-
-	switch metrica.MType {
-	case "gauge":
-		db.mut.Lock()
-		db.Metrics[metrica.ID] = metrica
-		db.Metrics[metrica.ID].Delta = nil
-		db.mut.Unlock()
-	case "counter":
-		db.mut.Lock()
-		if db.Metrics[metrica.ID] != nil && db.Metrics[metrica.ID].Delta != nil {
-			*db.Metrics[metrica.ID].Delta += *metrica.Delta
-		} else {
-			db.Metrics[metrica.ID] = metrica
-		}
-		db.Metrics[metrica.ID].Value = nil
-		db.mut.Unlock()
-
-	default:
-		return errors.New("invalid type")
-	}
-
-	return nil
-
-}
-
-func (db *DB) Get(t, name string) (*utils.Metrics, error) {
+func (db *DB) Get(t, name string) (utils.SysGather, error) {
 	db.mut.Lock()
 	defer db.mut.Unlock()
 	if m, ok := db.Metrics[name]; ok {
@@ -105,6 +72,10 @@ func (db *DB) Get(t, name string) (*utils.Metrics, error) {
 
 }
 
-func (db *DB) GetAll() utils.MetricsStorage {
-	return db.Metrics
+func (db *DB) GetAll() map[string]utils.SysGather {
+	fullMap := make(map[string]utils.SysGather, len(db.Metrics))
+	for name, m := range db.Metrics {
+		fullMap[name] = m
+	}
+	return fullMap
 }

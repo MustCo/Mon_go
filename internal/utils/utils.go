@@ -20,6 +20,10 @@ type Metrics struct {
 	Value *float64 `json:"value,omitempty"`
 }
 
+type SysGather interface {
+	Areas() (t, ID, value string)
+}
+
 type MetricsStorage map[string]*Metrics
 
 func (g Gauge) String() string {
@@ -39,6 +43,19 @@ func (m *Metrics) String() string {
 		s += fmt.Sprintf("value:%v\n", *m.Value)
 	}
 	return s
+}
+
+func (m *Metrics) Areas() (t, ID, value string) {
+	t = m.MType
+	ID = m.ID
+	if m.Delta != nil {
+		value = fmt.Sprintf("%v", *m.Delta)
+	}
+	if m.Value != nil {
+		value = fmt.Sprintf("%v", *m.Value)
+	}
+	return
+
 }
 
 func NewMetrics(id, mtype string) *Metrics {

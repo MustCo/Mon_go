@@ -5,6 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/Snakder/Mon_go/internal/server/db"
 	"github.com/Snakder/Mon_go/internal/utils"
 	"github.com/labstack/echo/v4"
 )
@@ -21,7 +22,7 @@ func TestUpdateHandler_postMetric(t *testing.T) {
 	*testMetrics["TestCounter"].Delta = 123
 
 	type want struct {
-		db  *DB
+		db  *db.DB
 		sc  int
 		err error
 	}
@@ -35,18 +36,18 @@ func TestUpdateHandler_postMetric(t *testing.T) {
 			name:    "Invalid Path",
 			handler: NewUpdateHandler(),
 			args:    args{w: httptest.NewRecorder(), r: httptest.NewRequest(http.MethodGet, "/status", nil)},
-			want:    want{db: NewDB(), sc: http.StatusMethodNotAllowed, err: echo.NewHTTPError(http.StatusNotImplemented, "invalid type")}},
+			want:    want{db: db.New(), sc: http.StatusMethodNotAllowed, err: echo.NewHTTPError(http.StatusNotImplemented, "invalid type")}},
 		{
 			name:    "Post_gauge",
 			handler: NewUpdateHandler(),
 			args:    args{w: httptest.NewRecorder(), r: httptest.NewRequest(http.MethodPost, "/update/gauge/TestGauge/123.124", nil)},
-			want:    want{db: NewDB(), sc: http.StatusOK, err: nil},
+			want:    want{db: db.New(), sc: http.StatusOK, err: nil},
 		},
 		{
 			name:    "Post_counter",
 			handler: NewUpdateHandler(),
 			args:    args{w: httptest.NewRecorder(), r: httptest.NewRequest(http.MethodPost, "/update/counter/TestCounter/123", nil)},
-			want:    want{db: NewDB(), sc: http.StatusOK, err: nil},
+			want:    want{db: db.New(), sc: http.StatusOK, err: nil},
 		},
 	}
 	tests[1].want.db.Metrics["TestGauge"] = testMetrics["TestGauge"]

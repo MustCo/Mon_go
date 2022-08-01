@@ -5,11 +5,17 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"strconv"
 
+	"github.com/Snakder/Mon_go/internal/server/db"
 	"github.com/Snakder/Mon_go/internal/utils"
 	"github.com/labstack/echo/v4"
 )
+
+type Storage interface {
+	Get(t, name string) (utils.SysGather, error)
+	Set(t, name, val string) error
+	GetAll() map[string]utils.SysGather
+}
 
 type APIServer struct {
 	config *utils.Config
@@ -33,7 +39,7 @@ type UpdateHandler struct {
 
 func NewUpdateHandler() *UpdateHandler {
 	updater := new(UpdateHandler)
-	updater.DB = NewDB()
+	updater.DB = db.New()
 	return updater
 }
 
@@ -43,13 +49,8 @@ func (handler *UpdateHandler) getAllMetrics(c echo.Context) error {
 	resp := c.Response()
 	resp.Header().Set("Content-Type", "text/plain")
 	for _, m := range metrics {
-		answer += m.ID
-		switch m.MType {
-		case "counter":
-			answer += fmt.Sprintf(" - %d\n", *m.Delta)
-		case "gauge":
-			answer += fmt.Sprintf(" - %.3f\n", *m.Value)
-		}
+		_, ID, value := m.Areas()
+		answer += fmt.Sprintf("%s = %v", ID, value)
 
 	}
 	return c.HTML(http.StatusOK, answer)
@@ -66,11 +67,7 @@ func (handler *UpdateHandler) getMetric(c echo.Context) error {
 	}
 	resp := c.Response()
 	resp.Header().Set("Content-Type", "text/plain")
-	if val.Delta != nil {
-		v = strconv.FormatInt(*val.Delta, 10)
-	} else {
-		v = strconv.FormatFloat(*val.Value, 'f', 3, 64)
-	}
+	_, _, v = val.Areas()
 	return c.HTML(http.StatusOK, v)
 }
 func (handler *UpdateHandler) postMetric(c echo.Context) error {
@@ -102,7 +99,7 @@ func (handler *UpdateHandler) updateJSON(c echo.Context) error {
 	}
 	switch {
 	}
-	err = handler.DB.SetMetrica(m)
+	err = handler.DB.Set(m.Areas())
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
