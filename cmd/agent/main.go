@@ -10,8 +10,8 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/MustCo/Mon_go/internal/agent"
-	"github.com/MustCo/Mon_go/internal/utils"
+	"github.com/Snakder/Mon_go/internal/agent"
+	"github.com/Snakder/Mon_go/internal/utils"
 	"github.com/caarlos0/env/v6"
 )
 

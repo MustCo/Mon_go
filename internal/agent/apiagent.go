@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/MustCo/Mon_go/internal/utils"
+	"github.com/Snakder/Mon_go/internal/utils"
 	"github.com/go-resty/resty/v2"
 )
 

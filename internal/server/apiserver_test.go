@@ -5,7 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/MustCo/Mon_go/internal/utils"
+	"github.com/Snakder/Mon_go/internal/utils"
 	"github.com/labstack/echo/v4"
 )
 

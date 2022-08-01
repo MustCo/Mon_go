@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/MustCo/Mon_go/internal/server"
-	"github.com/MustCo/Mon_go/internal/utils"
+	"github.com/Snakder/Mon_go/internal/server"
+	"github.com/Snakder/Mon_go/internal/utils"
 	"github.com/caarlos0/env/v6"
 )
 
