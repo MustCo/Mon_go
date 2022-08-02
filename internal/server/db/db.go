@@ -2,7 +2,6 @@ package db
 
 import (
 	"errors"
-	"strconv"
 	"strings"
 	"sync"
 
@@ -18,35 +17,16 @@ func New() *DB {
 
 type DB struct {
 	mut     *sync.Mutex
-	Metrics utils.MetricsStorage
+	Metrics map[string]utils.SysGather
 }
 
 func (db *DB) Set(t, name, val string) error {
-	var m *utils.Metrics
-	switch t {
-	case "counter":
-		d, err := strconv.ParseInt(val, 10, 64)
-		if err != nil {
-			return err
-		}
-		m = utils.NewMetrics(name, t)
-		db.mut.Lock()
-		if db.Metrics[name] != nil && db.Metrics[name].Delta != nil {
-			*m.Delta = d + *db.Metrics[name].Delta
-			db.Metrics[name].Value = nil
-		} else {
-			*m.Delta = d
-		}
-		db.mut.Unlock()
-	case "gauge":
-		v, err := strconv.ParseFloat(val, 64)
-		if err != nil {
-			return err
-		}
-		m = utils.NewMetrics(name, t)
-		*m.Value = v
-	default:
-		return errors.New("invalid type")
+	if db.Metrics[name] != nil {
+		db.Metrics[name].Update(val)
+	}
+	m, err := utils.NewMetrics(name, t, val)
+	if err != nil {
+		return err
 	}
 	db.mut.Lock()
 	db.Metrics[name] = m
@@ -61,7 +41,8 @@ func (db *DB) Get(t, name string) (utils.SysGather, error) {
 	if m, ok := db.Metrics[name]; ok {
 		switch strings.ToLower(t) {
 		case "gauge", "counter":
-			if m.MType == strings.ToLower(t) {
+			_, mtype, _ := m.Areas()
+			if mtype == strings.ToLower(t) {
 				return m, nil
 			}
 		default:

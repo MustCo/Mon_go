@@ -10,11 +10,9 @@ import (
 
 func getInitDB() *DB {
 	initDB := New()
-	m := utils.NewMetrics("TestGauge", "gauge")
-	*m.Value = 123.123
+	m, _ := utils.NewMetrics("TestGauge", "gauge", "123.123")
 	initDB.Metrics["TestGauge"] = m
-	m = utils.NewMetrics("TestCounter", "counter")
-	*m.Delta = 123
+	m, _ = utils.NewMetrics("TestCounter", "counter", "123")
 	initDB.Metrics["TestCounter"] = m
 	return initDB
 }
@@ -107,7 +105,7 @@ func TestDB_Get(t *testing.T) {
 		name string
 	}
 	type want struct {
-		res *utils.Metrics
+		res utils.SysGather
 		err error
 	}
 	tests := []struct {

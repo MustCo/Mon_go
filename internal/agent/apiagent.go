@@ -31,9 +31,9 @@ func (c *APIAgent) Report(ms utils.MetricsStorage) error {
 	return nil
 }
 
-func (c *APIAgent) sendJSON(m *utils.Metrics) error {
+func (c *APIAgent) sendJSON(m utils.SysGather) error {
 	resp, err := c.client.R().
-		SetBody(*m).
+		SetBody(m).
 		SetPathParams(map[string]string{
 			"host": c.config.Address,
 		}).
@@ -56,7 +56,10 @@ func (c *APIAgent) sendJSON(m *utils.Metrics) error {
 }
 
 func (c *APIAgent) Start(ctx context.Context) error {
-	m := utils.NewMetricsStorage()
+	log.Print(utils.NewMetrics("PollCount", "counter", "1"))
+	log.Print(utils.NewMetrics("Mygauge", "gauge", "1"))
+	m := utils.Poll("1")
+	log.Println(m)
 	c.client = resty.New()
 	c.client.R().
 		SetHeader("Content-Type", "application/json").
@@ -72,7 +75,10 @@ func (c *APIAgent) Start(ctx context.Context) error {
 				log.Println("Error", err)
 			}
 		case <-polls.C:
-			m.Poll()
+
+			_, _, val := m["PoolCount"].Areas()
+			m = utils.Poll(val)
+			log.Println(m)
 		case <-ctx.Done():
 			log.Println("Exit by context")
 			return nil
