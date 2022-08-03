@@ -96,10 +96,10 @@ func NewMetricsStorage() MetricsStorage {
 	return MetricsStorage{}
 }
 
-func Poll(poll_count string) map[string]SysGather {
+func Poll(pollCount string) map[string]SysGather {
 	var v string
 	m := NewMetricsStorage()
-	m["PollCount"], _ = NewMetrics("PollCount", "counter", poll_count)
+	m["PollCount"], _ = NewMetrics("PollCount", "counter", pollCount)
 	t := reflect.ValueOf(1.1).Type()
 	metrics := &runtime.MemStats{}
 	runtime.ReadMemStats(metrics)
