@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"math/rand"
@@ -78,6 +79,8 @@ func (m *Metrics) Update(value string) error {
 		}
 		m.Value = &v
 		m.Delta = nil
+	default:
+		return errors.New("invalid type")
 	}
 	return nil
 }
