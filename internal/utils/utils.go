@@ -39,7 +39,7 @@ func (m *Metrics) String() string {
 	if m.Delta != nil {
 		s += fmt.Sprintf("delta:%v\n", *m.Delta)
 	}
-	if m.Delta != nil {
+	if m.Value != nil {
 		s += fmt.Sprintf("value:%v\n", *m.Value)
 	}
 	return s
@@ -61,32 +61,35 @@ func (m *Metrics) Areas() (id, mtype, value string) {
 func (m *Metrics) Update(value string) error {
 	switch m.MType {
 	case "counter":
-		log.Print("Create Counter", m)
 		d, err := strconv.ParseInt(value, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.Delta = &d
-		log.Print(m)
+		if m.Delta != nil {
+			*m.Delta += d
+		} else {
+			m.Delta = &d
+		}
+		m.Value = nil
 	case "gauge":
 		v, err := strconv.ParseFloat(value, 64)
 		if err != nil {
 			return err
 		}
 		m.Value = &v
+		m.Delta = nil
 	}
 	return nil
 }
 
 func NewMetrics(id, mtype, value string) (*Metrics, error) {
-	m := new(Metrics)
-	m.ID = id
-	m.MType = mtype
-	log.Println("Metric")
-	log.Print(m)
-	m.Update(value)
+	m := &Metrics{
+		ID:    id,
+		MType: mtype,
+	}
+	err := m.Update(value)
 
-	return m, nil
+	return m, err
 }
 
 func NewMetricsStorage() MetricsStorage {

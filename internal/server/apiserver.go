@@ -76,7 +76,7 @@ func (handler *UpdateHandler) postMetric(c echo.Context) error {
 	name := c.Param("name")
 	val := c.Param("value")
 	log.Printf("Post Metric type:%s name:%s value:%s", t, name, val)
-	err := handler.DB.Set(t, name, val)
+	err := handler.DB.Set(name, t, val)
 	switch {
 	case err == nil:
 		return nil

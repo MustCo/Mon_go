@@ -56,8 +56,6 @@ func (c *APIAgent) sendJSON(m utils.SysGather) error {
 }
 
 func (c *APIAgent) Start(ctx context.Context) error {
-	log.Print(utils.NewMetrics("PollCount", "counter", "1"))
-	log.Print(utils.NewMetrics("Mygauge", "gauge", "1"))
 	m := utils.Poll("1")
 	log.Println(m)
 	c.client = resty.New()
@@ -75,10 +73,11 @@ func (c *APIAgent) Start(ctx context.Context) error {
 				log.Println("Error", err)
 			}
 		case <-polls.C:
-
-			_, _, val := m["PoolCount"].Areas()
+			counter := m["PollCount"]
+			counter.Update("1")
+			_, _, val := counter.Areas()
+			log.Println(val)
 			m = utils.Poll(val)
-			log.Println(m)
 		case <-ctx.Done():
 			log.Println("Exit by context")
 			return nil

@@ -20,9 +20,10 @@ type DB struct {
 	Metrics map[string]utils.SysGather
 }
 
-func (db *DB) Set(t, name, val string) error {
+func (db *DB) Set(name, t, val string) error {
 	if db.Metrics[name] != nil {
-		db.Metrics[name].Update(val)
+		err := db.Metrics[name].Update(val)
+		return err
 	}
 	m, err := utils.NewMetrics(name, t, val)
 	if err != nil {
@@ -39,13 +40,10 @@ func (db *DB) Get(t, name string) (utils.SysGather, error) {
 	db.mut.Lock()
 	defer db.mut.Unlock()
 	if m, ok := db.Metrics[name]; ok {
-		switch strings.ToLower(t) {
-		case "gauge", "counter":
-			_, mtype, _ := m.Areas()
-			if mtype == strings.ToLower(t) {
-				return m, nil
-			}
-		default:
+		_, mtype, _ := m.Areas()
+		if mtype == strings.ToLower(t) {
+			return m, nil
+		} else {
 			return nil, errors.New("invalid type")
 		}
 	}
@@ -54,9 +52,5 @@ func (db *DB) Get(t, name string) (utils.SysGather, error) {
 }
 
 func (db *DB) GetAll() map[string]utils.SysGather {
-	fullMap := make(map[string]utils.SysGather, len(db.Metrics))
-	for name, m := range db.Metrics {
-		fullMap[name] = m
-	}
-	return fullMap
+	return db.Metrics
 }
