@@ -50,7 +50,7 @@ func (handler *UpdateHandler) getAllMetrics(c echo.Context) error {
 	resp.Header().Set("Content-Type", "text/plain")
 	for _, m := range metrics {
 		ID, _, value := m.Areas()
-		answer += fmt.Sprintf("%s = %v", ID, value)
+		answer += fmt.Sprintf("%s = %v\n", ID, value)
 
 	}
 	return c.HTML(http.StatusOK, answer)
