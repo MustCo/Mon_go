@@ -49,7 +49,7 @@ func (handler *UpdateHandler) getAllMetrics(c echo.Context) error {
 	resp := c.Response()
 	resp.Header().Set("Content-Type", "text/plain")
 	for _, m := range metrics {
-		_, ID, value := m.Areas()
+		ID, _, value := m.Areas()
 		answer += fmt.Sprintf("%s = %v", ID, value)
 
 	}
