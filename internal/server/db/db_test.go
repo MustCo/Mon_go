@@ -2,23 +2,14 @@ package db
 
 import (
 	"errors"
+	"sync"
 	"testing"
 
 	"github.com/Snakder/Mon_go/internal/utils"
 	"github.com/stretchr/testify/assert"
 )
 
-func getInitDB() *DB {
-	initDB := New()
-	m, _ := utils.NewMetrics("TestGauge", "gauge", "123.123")
-	initDB.Metrics["TestGauge"] = m
-	m, _ = utils.NewMetrics("TestCounter", "counter", "123")
-	initDB.Metrics["TestCounter"] = m
-	return initDB
-}
-
 func TestDB_Set(t *testing.T) {
-
 	type args struct {
 		t    string
 		name string
@@ -36,7 +27,7 @@ func TestDB_Set(t *testing.T) {
 	}{
 		{
 			name: "TestGauge",
-			db:   getInitDB(),
+			db:   New(),
 			args: args{t: "gauge", name: "Mymetric", val: "1.329184"},
 			want: want{
 				err: nil,
@@ -44,7 +35,7 @@ func TestDB_Set(t *testing.T) {
 		},
 		{
 			name: "TestInvalidGauge",
-			db:   getInitDB(),
+			db:   New(),
 			args: args{t: "gauge", name: "Mymetric", val: "1,FSD29184"},
 			want: want{
 				err: errors.New("error"),
@@ -52,7 +43,7 @@ func TestDB_Set(t *testing.T) {
 		},
 		{
 			name: "TestCounter",
-			db:   getInitDB(),
+			db:   New(),
 			args: args{t: "counter", name: "Mymetric", val: "14563"},
 			want: want{
 				err: nil,
@@ -60,7 +51,7 @@ func TestDB_Set(t *testing.T) {
 		},
 		{
 			name: "TestInvalidCounter",
-			db:   getInitDB(),
+			db:   New(),
 			args: args{t: "counter", name: "Mymetric", val: "1.329184"},
 			want: want{
 				err: errors.New("error"),
@@ -68,20 +59,22 @@ func TestDB_Set(t *testing.T) {
 		},
 		{
 			name: "TestInvalidType",
-			db:   getInitDB(),
+			db:   New(),
 			args: args{t: "Mytype", name: "Mymetric", val: "1sdfgsd4"},
 			want: want{
 				err: errors.New("unknown metric"),
 			},
 		}}
 	for i, test := range tests {
-		db := getInitDB()
-		db.Set(test.args.t, test.args.name, test.args.val)
-		tests[i].want.db = db
+		db := utils.NewMetricsStorage()
+		m, _ := utils.NewMetrics(test.args.name, test.args.t, test.args.val)
+		db[test.args.name] = m
+		tests[i].want.db = &DB{Metrics: db, mut: &sync.Mutex{}}
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := tt.db.Set(tt.args.t, tt.args.name, tt.args.val)
+			t.Logf("%s %s %s", tt.args.name, tt.args.t, tt.args.val)
+			err := tt.db.Set(tt.args.name, tt.args.t, tt.args.val)
 			if err != nil {
 				if tt.want.err != nil {
 					return
@@ -95,11 +88,10 @@ func TestDB_Set(t *testing.T) {
 
 func TestDB_Get(t *testing.T) {
 	initDB := New()
-	initDB.Set("gauge", "TestGauge", "123.123")
-	initDB.Set("counter", "TestCounter", "123")
-	initDB.Set("gauge", "Mygauge", "14.563")
-	initDB.Set("counter", "Mycounter", "14563")
-
+	initDB.Set("TestGauge", "gauge", "123.123")
+	initDB.Set("TestCounter", "counter", "123")
+	initDB.Set("Mygauge", "gauge", "14.563")
+	initDB.Set("Mycounter", "counter", "14563")
 	type args struct {
 		t    string
 		name string
