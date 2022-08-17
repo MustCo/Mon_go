@@ -5,5 +5,4 @@ import (
 )
 
 func TestUtils_Poll(t *testing.T) {
-	return
 }
