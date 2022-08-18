@@ -25,6 +25,11 @@ func (db *DB) Set(name, t, val string) error {
 	if err != nil {
 		return err
 	}
+	if db.Metrics[name] != nil {
+		err := db.Metrics[name].Update(val)
+		return err
+	}
+
 	db.mut.Lock()
 	db.Metrics[name] = m
 	db.mut.Unlock()
