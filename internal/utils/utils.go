@@ -53,7 +53,7 @@ func (m *Metrics) Areas() (id, mtype, value string) {
 		value = fmt.Sprintf("%d", *m.Delta)
 	}
 	if m.Value != nil {
-		value = fmt.Sprintf("%f", *m.Value)
+		value = fmt.Sprintf("%v", *m.Value)
 	}
 	return
 
