@@ -21,10 +21,6 @@ type DB struct {
 }
 
 func (db *DB) Set(name, t, val string) error {
-	if db.Metrics[name] != nil {
-		err := db.Metrics[name].Update(val)
-		return err
-	}
 	m, err := utils.NewMetrics(name, t, val)
 	if err != nil {
 		return err

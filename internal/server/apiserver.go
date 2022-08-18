@@ -71,7 +71,6 @@ func (handler *UpdateHandler) getMetric(c echo.Context) error {
 	return c.HTML(http.StatusOK, v)
 }
 func (handler *UpdateHandler) postMetric(c echo.Context) error {
-
 	t := c.Param("type")
 	name := c.Param("name")
 	val := c.Param("value")
